@@ -421,6 +421,7 @@ let
         inherit (browser.meta) description;
         mainProgram = launcherName;
         hydraPlatforms = [];
+        broken = stdenv.isDarwin;
         priority = (browser.meta.priority or 0) - 1; # prefer wrapper over the package
       };
     };
