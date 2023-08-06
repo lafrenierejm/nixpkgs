@@ -31015,15 +31015,25 @@ with pkgs;
   };
   firefox-esr = firefox-esr-115;
 
-  firefox-bin-unwrapped = callPackage ../applications/networking/browsers/firefox-bin {
+  firefox-bin-unwrapped = callPackage ../applications/networking/browsers/firefox-bin/linux.nix {
     inherit (gnome) adwaita-icon-theme;
     channel = "release";
     generated = import ../applications/networking/browsers/firefox-bin/release_sources.nix;
   };
 
-  firefox-bin = wrapFirefox firefox-bin-unwrapped {
+  firefox-bin = let
     pname = "firefox-bin";
-  };
+  in
+    if stdenv.isDarwin then
+      callPackage ../applications/networking/browsers/firefox-bin/darwin.nix {
+        inherit pname;
+        channel = "release";
+        generated = import ../applications/networking/browsers/firefox-bin/release_sources.nix;
+      }
+    else
+      wrapFirefox firefox-bin-unwrapped {
+        inherit pname;
+      };
 
   firefox-beta-bin-unwrapped = firefox-bin-unwrapped.override {
     inherit (gnome) adwaita-icon-theme;
@@ -31031,22 +31041,41 @@ with pkgs;
     generated = import ../applications/networking/browsers/firefox-bin/beta_sources.nix;
   };
 
-  firefox-beta-bin = res.wrapFirefox firefox-beta-bin-unwrapped {
+  firefox-beta-bin = let
     pname = "firefox-beta-bin";
     desktopName = "Firefox Beta";
-  };
+  in
+    if stdenv.isDarwin then
+      firefox-bin.override {
+        inherit pname desktopName;
+        channel = "beta";
+        generated = import ../applications/networking/browsers/firefox-bin/beta_sources.nix;
+      }
+    else
+      wrapFirefox firefox-beta-bin-unwrapped {
+        inherit pname desktopName;
+      };
 
-  firefox-devedition-bin-unwrapped = callPackage ../applications/networking/browsers/firefox-bin {
+  firefox-devedition-bin-unwrapped = firefox-bin-unwrapped.override {
     inherit (gnome) adwaita-icon-theme;
     channel = "developer-edition";
     generated = import ../applications/networking/browsers/firefox-bin/developer-edition_sources.nix;
   };
 
-  firefox-devedition-bin = res.wrapFirefox firefox-devedition-bin-unwrapped {
+  firefox-devedition-bin = let
     pname = "firefox-devedition-bin";
     desktopName = "Firefox DevEdition";
-    wmClass = "firefox-aurora";
-  };
+  in
+    if stdenv.isDarwin then
+      firefox-bin.override {
+        inherit pname desktopName;
+        generated = import ../applications/networking/browsers/firefox-bin/devedition_sources.nix;
+      }
+    else
+      wrapFirefox firefox-devedition-bin-unwrapped {
+        inherit pname desktopName;
+        wmClass = "firefox-aurora";
+      };
 
   librewolf-unwrapped = callPackage ../applications/networking/browsers/librewolf { };
 
