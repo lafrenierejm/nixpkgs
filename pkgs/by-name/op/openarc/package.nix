@@ -36,6 +36,8 @@ stdenv.mkDerivation (finalAttrs: {
     openssl
   ];
 
+  env.NIX_CFLAGS_COMPILE = lib.optionalString stdenv.hostPlatform.isDarwin "-DBIND_8_COMPAT";
+
   postInstall = ''
     wrapProgram $out/bin/openarc-keygen \
       --prefix PATH : ${
