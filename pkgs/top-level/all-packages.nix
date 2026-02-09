@@ -7905,6 +7905,8 @@ with pkgs;
     go = buildPackages.go_1_26;
   };
 
+  updateGoGitHubModule = callPackage ../build-support/go/update/github.nix { };
+
   ### DEVELOPMENT / HARE
 
   hareHook = callPackage ../by-name/ha/hare/hook.nix { };
