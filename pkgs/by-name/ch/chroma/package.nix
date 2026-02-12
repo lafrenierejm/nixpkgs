@@ -2,44 +2,46 @@
   lib,
   buildGoModule,
   fetchFromGitHub,
+  updateGoGitHubModule,
+  versionCheckHook,
 }:
 
-let
-  srcInfo = lib.importJSON ./src.json;
-in
-
-buildGoModule rec {
+buildGoModule (finalAttrs: {
   pname = "chroma";
-  version = "2.22.0";
+  version = "2.23.1";
+  commitSha = "5b4188b4057fe666b2501704f40c38b5a0e4d496";
+  commitDate = "2026-01-23T02:31:21Z";
 
-  # To update:
-  # nix-prefetch-git --rev v${version} https://github.com/alecthomas/chroma.git > src.json
   src = fetchFromGitHub {
     owner = "alecthomas";
     repo = "chroma";
-    rev = "v${version}";
-    inherit (srcInfo) sha256;
+    tag = "v${finalAttrs.version}";
+    hash = "sha256-Znmcds0ru9VyH/0qE7KnW7l0QeRDoh9PnUPHTYPAA6w=";
   };
 
-  vendorHash = "sha256-kzlXrIMSa5C4UFt+BiMh6NedelQG49OxYbreeWhCb80=";
+  vendorHash = "sha256-3mmO5hjjIqVqKiSOrFFQH8OaQTviJVHrznMYsgHP82A=";
 
   modRoot = "./cmd/chroma";
 
-  # substitute version info as done in goreleaser builds
   ldflags = [
-    "-X"
-    "main.version=${version}"
-    "-X"
-    "main.commit=${srcInfo.rev}"
-    "-X"
-    "main.date=${srcInfo.date}"
+    "-X=main.version=${finalAttrs.version}"
+    "-X=main.commit=${finalAttrs.commitSha}"
+    "-X=main.date=${finalAttrs.commitDate}"
   ];
+
+  nativeInstallCheckInputs = [ versionCheckHook ];
+  doInstallCheck = true;
+
+  passthru.updateScript = updateGoGitHubModule {
+    inherit (finalAttrs) pname;
+    inherit (finalAttrs.src) owner repo;
+  };
 
   meta = {
     homepage = "https://github.com/alecthomas/chroma";
     description = "General purpose syntax highlighter in pure Go";
     license = lib.licenses.mit;
-    maintainers = [ lib.maintainers.sternenseemann ];
+    maintainers = with lib.maintainers; [ sternenseemann ];
     mainProgram = "chroma";
   };
-}
+})
