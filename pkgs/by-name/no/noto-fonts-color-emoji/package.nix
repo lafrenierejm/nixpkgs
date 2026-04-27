@@ -13,7 +13,7 @@
   which,
 }:
 
-stdenvNoCC.mkDerivation rec {
+stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "noto-fonts-color-emoji";
   version = "2.051";
 
@@ -78,4 +78,4 @@ stdenvNoCC.mkDerivation rec {
       sternenseemann
     ];
   };
-}
+})
