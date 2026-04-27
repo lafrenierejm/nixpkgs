@@ -56,10 +56,12 @@ stdenvNoCC.mkDerivation rec {
 
   enableParallelBuilding = true;
 
+  # installFonts cannot be used here.
+  # The build generates multiple intermediate .ttf files alongside the final NotoColorEmoji.ttf.
+  # Some of the .ttf basenames are identical, causing install to fail.
   installPhase = ''
     runHook preInstall
-    mkdir -p $out/share/fonts/noto
-    cp NotoColorEmoji.ttf $out/share/fonts/noto
+    install -Dm644 NotoColorEmoji.ttf -t $out/share/fonts/truetype
     runHook postInstall
   '';
 
